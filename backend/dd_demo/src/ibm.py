@@ -58,7 +58,6 @@ if __name__ == "__main__":
     assert not bad, f"unclamped T2>2*T1 on qubits {bad}"
 
     # live test only if a real token is configured
-    token = os.getenv("IBM_QUANTUM_TOKEN")
     load_dotenv()
     token = os.getenv("IBM_QUANTUM_TOKEN")
     if token and token != "paste_your_api_key_here":

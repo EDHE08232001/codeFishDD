@@ -15,9 +15,13 @@ def colored_noise(
 ) -> np.ndarray:
     """Zero-mean Gaussian noise traces, shape (n_real, n_steps), std = sigma.
 
-    kind: "1/f", "lorentzian" (correlation time tau_c) or "white".
+    kind: "1/f", "lorentzian" (correlation time tau_c), "white", or "static"
+    (one constant detuning per realization: the textbook spin-echo case).
     """
     rng = rng or np.random.default_rng()
+    if kind == "static":
+        offsets = rng.standard_normal((n_real, 1))
+        return np.repeat(offsets * (sigma / offsets.std()), n_steps, axis=1)
     white = rng.standard_normal((n_real, n_steps))
     spec = np.fft.rfft(white, axis=1)
     f = np.fft.rfftfreq(n_steps, dt)
@@ -50,4 +54,8 @@ if __name__ == "__main__":
               f"std/sigma={x.std() / sigma:.3f} PSD slope={slope:+.2f}")
         assert abs(x.std() / sigma - 1) < 1e-6
         assert lo < slope < hi
+    static = colored_noise(500, n_steps, dt, sigma, kind="static", rng=rng)
+    print(f"static     shape={static.shape} std/sigma={static.std() / sigma:.3f} constant per row="
+          f"{bool(np.all(static == static[:, :1]))}")
+    assert abs(static.std() / sigma - 1) < 1e-6 and np.all(static == static[:, :1])
     print("noise.py OK")

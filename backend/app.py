@@ -10,11 +10,13 @@ from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 from .core import simulate, fit
+from .dd_api import router as dd_router
 
 app = FastAPI(title='ZNE Learning Game')
 frontend_port = int(os.getenv('ZNE_FRONTEND_PORT', '5173'))
 app.add_middleware(CORSMiddleware, allow_origins=[f'http://localhost:{frontend_port}',f'http://127.0.0.1:{frontend_port}'],
     allow_methods=['GET','POST'], allow_headers=['Content-Type'])
+app.include_router(dd_router)
 DATA = Path(__file__).resolve().parent / 'data'
 LOCK = threading.RLock()
 POOL = ThreadPoolExecutor(max_workers=1)

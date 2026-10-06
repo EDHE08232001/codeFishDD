@@ -27,3 +27,107 @@ button,select,.results,details{border-radius:0}button{border:2px solid #79eee3;b
 /* Focused hackathon learning flow */
 .focused-mission{max-width:1080px;padding-top:24px}.focused-mission .quest-top{padding-bottom:16px}.focused-progress{border:0;margin:0 auto;padding:22px 0;max-width:900px}.focused-mission .hub-mission{margin:0 auto 24px;padding:28px 34px}.mission-mode{font-size:10px;color:#c6dfe9;letter-spacing:1px}.fish-brief{display:flex;align-items:center;gap:18px;margin:20px 0}.fish-brief .codfish{width:100px;height:60px;filter:drop-shadow(3px 4px 0 #082f45)}.crew-label{color:#a2efe2;font-size:10px;letter-spacing:1px}.fish-brief h1{font-size:clamp(22px,3vw,32px);letter-spacing:-.5px;line-height:1.25;margin:8px 0 0;max-width:none}.mission-scene{margin:22px 0 26px;padding:24px;background:#0e354e;border:2px solid #417b94}.scene-diagram{display:flex;align-items:center;justify-content:center;gap:16px}.scene-node{min-width:0;width:180px;text-align:center;padding:16px 10px;background:#1a5570;border:2px solid #68cbcf;box-shadow:4px 4px 0 #08293e}.scene-node span{display:block;font-size:11px;color:#d5eef4}.scene-node strong{display:block;font-size:28px;line-height:1.3;color:#aaffdf;margin-top:12px;overflow-wrap:anywhere}.scene-node-1{border-color:#b9a8ed;background:#394c7b}.scene-node-1 strong{color:#dfcaff}.scene-node-2{border-color:#ffbf81}.scene-node-2 strong{color:#ffdaa8}.scene-arrow{font-size:24px;color:#9ee5df}.mission-scene figcaption{text-align:center;font-size:12px;color:#dbedf4;line-height:1.7;margin-top:22px}.mission-scene figcaption span{display:block;color:#a1c5d6;font-size:10px;margin-top:4px}.focused-mission .main-question{font-size:20px;line-height:1.5;margin-bottom:18px}.mission-answers{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}.answer-option{display:flex;align-items:center;gap:12px;text-align:left;background:#255775;color:#f6fcff;border:2px solid #7ebccb;padding:16px 12px;min-height:85px;font-size:13px;line-height:1.5;position:relative}.answer-letter{display:grid;place-items:center;width:28px;height:28px;flex-shrink:0;color:#ffdfad;background:#12374f;border:1px solid #679cb1}.answer-option:hover:not(:disabled){background:#337596;border-color:#b8fff1}.answer-option.answer-correct{opacity:1;background:#277a66;border-color:#a4ffd1}.answer-option.answer-wrong{border-color:#ffb494;background:#624c68;padding-bottom:26px}.answer-option small{position:absolute;bottom:7px;left:52px;color:#ffd7bc;font-size:9px}.answer-feedback{margin-top:24px;padding:18px;background:#344e6c;border-left:4px solid #ffbd86;font-size:13px;line-height:1.7}.feedback-correct{background:#205a57;border-color:#9ef5bf}.answer-feedback strong{color:#ffddb3}.feedback-correct strong{color:#c3ffd6}.answer-feedback p{margin:8px 0 0}.result-actions{display:flex;gap:12px;flex-wrap:wrap;margin-top:18px}.result-actions button{font-size:13px}.focused-mission .hub-note{text-align:center;font-size:10px;max-width:780px;margin-top:15px}.focused-mission .quest-top .secondary{min-height:36px}.focused-mission .hub-mission::before{width:55px}.focused-mission .complete-badge{padding:6px 10px;font-size:11px}
 @media(max-width:650px){.focused-mission{padding:16px 14px}.focused-mission .hub-mission{padding:22px 16px}.quest-top .codfish-brand{font-size:10px;gap:3px}.quest-top .codfish-brand .codfish{width:30px}.scene-diagram{gap:7px}.scene-arrow{font-size:16px}.scene-node{padding:12px 6px}.scene-node strong{font-size:21px}.scene-node span{font-size:9px}.mission-scene{padding:18px 10px}.mission-answers{grid-template-columns:1fr;gap:10px}.answer-option{min-height:60px}.fish-brief{gap:10px}.fish-brief .codfish{width:70px;height:42px}.fish-brief h1{font-size:22px}.mission-mode{display:none}.focused-mission .quest-top .secondary{font-size:9px;padding:6px}.mission-progress span{font-size:10px}}
+
+/* Pulse Patrol: dynamical decoupling lab (reuses the reef palette above) */
+.dd-lab{max-width:1040px}
+.mini-game.dd-shell{max-width:980px}
+.dd-shell h2{font-size:22px;line-height:1.4}
+.dd-chapters{border-top:0;margin-top:6px;padding-top:4px}
+.dd-chapters button{padding:5px 10px}
+.dd-level>p,.dd-learn>p{line-height:1.8;font-size:14px}
+.dd-level-title{margin:8px 0 0!important;font-size:clamp(22px,3vw,30px)!important}
+.dd-goal{padding:10px 14px;background:#0e354e;border:2px solid #417b94}
+.dd-concepts{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;margin:20px 0 26px}
+.dd-concepts article{background:linear-gradient(145deg,#215b78,#173f62);border:2px solid #62c8ce;padding:16px;box-shadow:4px 4px 0 #08293e}
+.dd-concepts article:nth-child(2){background:linear-gradient(145deg,#4c5689,#273f69);border-color:#aaa4ef}
+.dd-concepts h3{font-size:15px;margin:14px 0 6px}
+.dd-concepts p{font-size:13px!important;line-height:1.65!important;margin:0;color:#e0f0f7}
+.dd-list{margin:10px 0 0;padding-left:4px;list-style:none;line-height:1.9}
+.dd-playground{background:#0e354e;border:2px solid #417b94;padding:18px;margin:8px 0 22px}
+.dd-playground-body{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:22px;align-items:center}
+.dd-big-number{font-size:15px}
+.dd-big-number strong{font-size:30px;color:#ffe18a;margin-left:8px}
+.dd-ring-figure{margin:0}
+.dd-ring{display:block;width:100%;max-width:320px;margin:10px auto 0;overflow:visible}
+.dd-ring .ring{fill:#0b2a40;stroke:#68cbcf;stroke-width:3;stroke-dasharray:8 6}
+.dd-ring.flash .ring{stroke:#ffe18a;stroke-width:5}
+.dd-ring .axis-line{stroke:#2f6b85;stroke-width:1}
+.dd-ring .start-mark{fill:#a5f7c9;stroke:#0b2a40;stroke-width:2}
+.dd-ring .arrow{stroke:#ffe18a;stroke-width:4}
+.dd-ring .arrow-tip{fill:#ffe18a;stroke:#0b2a40;stroke-width:2}
+.dd-ring text{fill:#d5eef4;font-size:12px}
+.dd-ring .bolt{font-size:26px;fill:#ffe18a}
+.dd-ring-figure figcaption{font-size:11px;line-height:1.6;color:#c7e0ed;text-align:center;margin-top:8px}
+.dd-ring-figure figcaption span{display:inline}
+.dd-track-wrap{margin:18px 0 6px}
+.dd-track{position:relative;height:70px;background:#0b2a40;border:2px solid #4f8aa3;cursor:copy;box-shadow:3px 3px 0 #08293e}
+.dd-track.locked{cursor:default}
+.dd-track-label{position:absolute;bottom:4px;left:6px;font-size:9px;letter-spacing:1px;color:#8fbfd0;pointer-events:none}
+.dd-track-label.end{left:auto;right:6px}
+.dd-track .playhead{position:absolute;top:-6px;bottom:-6px;width:3px;margin-left:-1px;background:#ffe18a;pointer-events:none;box-shadow:0 0 6px #ffe18a88}
+button.dd-pulse{position:absolute;top:6px;transform:translateX(-50%);min-height:44px;min-width:0;width:30px;padding:3px 0;font-size:11px;line-height:1.25;z-index:1;box-shadow:2px 2px 0 #020917}
+button.dd-pulse:active:not(:disabled){transform:translate(-50%,2px)}
+button.dd-pulse.axis-y{background:#66519a;border-color:#c6a9ff;color:#fff}
+.dd-ticks{display:flex;justify-content:space-between;font-size:10px;color:#c7e0ed;margin-top:6px}
+.dd-replay{display:flex;align-items:end;gap:14px;flex-wrap:wrap;margin:10px 0 4px}
+.dd-replay label{flex:1 1 160px}
+.dd-replay button{min-height:40px;padding:8px 14px;font-size:12px}
+.dd-button-row{display:flex;gap:10px;flex-wrap:wrap}
+.dd-button-row button{flex:1 1 auto;min-height:40px;padding:8px 10px;font-size:12px}
+.dd-pattern{font-size:12px;color:#c7e0ed;overflow-wrap:anywhere;margin:0}
+.dd-stars{font-size:22px!important;color:#ffe18a!important;letter-spacing:4px}
+.dd-quiz{margin-top:22px;padding:18px;background:#0e354e;border:2px solid #417b94}
+.dd-quiz h3{font-size:16px;line-height:1.6;margin:0 0 14px}
+.dd-quiz-options{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.dd-compare{margin-top:24px}
+.dd-compare h3{font-size:16px;margin:0 0 12px}
+.dd-bars{display:flex;flex-direction:column;gap:8px}
+.dd-bar-row{display:grid;grid-template-columns:150px minmax(0,1fr) 60px 70px;gap:12px;align-items:center;font-size:12px}
+.dd-bar-row.you .dd-bar-label{color:#ffe18a;font-weight:700}
+.dd-bar-row strong{font-family:ui-monospace,monospace;color:#f2fcff;text-align:right}
+.dd-bar-row button{min-height:32px;padding:4px 8px;font-size:11px}
+.dd-bar-track{position:relative;height:18px;background:#07101d;border:2px solid #668aa6}
+.dd-bar-track::before{content:'';position:absolute;left:50%;top:-4px;bottom:-4px;width:2px;background:#8fbfd0}
+.dd-bar-fill{position:absolute;top:0;bottom:0;background:#38bde0}
+.dd-bar-row.you .dd-bar-fill{background:#ffe18a}
+.dd-bar-fill.negative{background:#f2775f}
+.dd-bar-target{position:absolute;top:-6px;bottom:-6px;width:3px;margin-left:-1px;background:#a5f7c9;z-index:1}
+.dd-chart{position:relative}
+.dd-chart svg{height:auto}
+.dd-baseline{stroke:#8fbfd0;stroke-width:1.5;stroke-dasharray:4 4}
+.chart .dd-baseline-label,.chart .dd-direct-label{fill:#d5eef4;font-size:11px}
+.dd-crosshair{stroke:#d5eef4;stroke-width:1;opacity:.6}
+.dd-marker{stroke:#173f5a;stroke-width:2}
+.dd-tooltip{position:absolute;top:8px;transform:translateX(-50%);display:flex;flex-direction:column;gap:3px;padding:8px 10px;background:#0b2a40;border:2px solid #72becb;box-shadow:3px 3px 0 #031c2b;font-size:11px;color:#e0f0f7;pointer-events:none;white-space:nowrap;z-index:2}
+.dd-tooltip i,.dd-swatch{display:inline-block;width:9px;height:9px;margin-right:6px;vertical-align:baseline}
+.dd-lab-chart{margin-top:18px}
+.dd-table-wrap{overflow-x:auto}
+.dd-table{border-collapse:collapse;font-size:12px;width:100%}
+.dd-table th,.dd-table td{border:1px solid #2f6b85;padding:6px 8px;text-align:right;white-space:nowrap}
+.dd-table th{color:#d5eef4;background:#123c4c}
+.dd-run-panel{margin-top:26px;padding:18px;border:2px solid #417b94;background:#0e354e}
+.dd-run-panel h3{margin:0 0 10px;font-size:17px}
+.dd-checks{display:flex;flex-wrap:wrap;gap:10px 18px;border:2px solid #417b94;padding:12px 14px;margin:6px 0 18px}
+.dd-checks legend{font-size:12px;color:#c7e0ed;padding:0 6px}
+.dd-checks label{flex-direction:row;align-items:center;gap:8px;font-size:13px;color:#f2fcff}
+.dd-checks input{accent-color:#61d7f2;width:16px;height:16px}
+.dd-shell input[type=number]{padding:11px 12px;border:1px solid #28506e;background:#0c2035;color:#edf7ff;font:inherit;font-size:14px;min-height:46px;width:100%;min-width:0}
+.dd-shell .controls{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));align-items:end}
+.dd-shell code{font-size:12px;color:#ffe18a;overflow-wrap:anywhere}
+.dd-shell details summary{font-size:13px}
+
+@media(max-width:850px){.dd-concepts{grid-template-columns:1fr}
+.dd-quiz-options{grid-template-columns:1fr}
+}
+
+@media(max-width:650px){.dd-playground-body{grid-template-columns:1fr}
+.dd-bar-row{grid-template-columns:96px minmax(0,1fr) 48px;gap:8px}
+.dd-bar-row button{grid-column:1/-1;justify-self:start}
+.dd-bar-row>span:last-child:empty{display:none}
+button.dd-pulse{width:20px;font-size:9px;min-height:40px}
+.dd-chapters button{padding:4px 7px;font-size:11px}
+.dd-tooltip{font-size:10px}
+}
+
+@media(prefers-reduced-motion:reduce){.dd-ring.flash .ring{stroke-width:3}
+}

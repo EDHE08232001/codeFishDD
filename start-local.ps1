@@ -27,13 +27,18 @@ $frontendRoot = Join-Path $projectRoot 'frontend'
 $viteScript = Join-Path $frontendRoot 'node_modules/vite/bin/vite.js'
 $logRoot = Join-Path $projectRoot '.local'
 $venvPython = Join-Path $projectRoot '.venv/Scripts/python.exe'
-$runtimePython = Join-Path $env:USERPROFILE '.cache/codex-runtimes/codex-primary-runtime/dependencies/python/python.exe'
+$venvPythonPosix = Join-Path $projectRoot '.venv/bin/python'   # PowerShell 7 on macOS/Linux
+$runtimePython = if ($env:USERPROFILE) { Join-Path $env:USERPROFILE '.cache/codex-runtimes/codex-primary-runtime/dependencies/python/python.exe' } else { $null }
 if (Test-Path -LiteralPath $venvPython) {
     $pythonExecutable = $venvPython
-} elseif (Test-Path -LiteralPath $runtimePython) {
+} elseif (Test-Path -LiteralPath $venvPythonPosix) {
+    $pythonExecutable = $venvPythonPosix
+} elseif ($runtimePython -and (Test-Path -LiteralPath $runtimePython)) {
     $pythonExecutable = $runtimePython
 } else {
-    $pythonExecutable = (Get-Command python -ErrorAction Stop).Source
+    $pythonCommand = Get-Command python -ErrorAction SilentlyContinue
+    if (-not $pythonCommand) { $pythonCommand = Get-Command python3 -ErrorAction Stop }
+    $pythonExecutable = $pythonCommand.Source
 }
 $nodeExecutable = (Get-Command node -ErrorAction Stop).Source
 if (-not (Test-Path -LiteralPath $viteScript)) {

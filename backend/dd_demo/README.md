@@ -30,11 +30,11 @@ Three experiments, in increasing realism. All run from `main.py`.
 | Command | What it does | Needs a token? |
 |---|---|---|
 | `python main.py theory` | NumPy model of dephasing under 1/f noise for free evolution, Hahn, CPMG, UDD and XY4. Instant. | No |
-| `python main.py local` | The same physics as real Qiskit circuits: the noise is applied as RZ rotations between DD pulses, simulated exactly. Includes optional pulse over-rotation. | No |
+| `python main.py local` | The same physics as real Qiskit circuits: the noise is applied as RZ rotations between DD pulses, simulated exactly. Includes optional pulse over-rotation. Add `--engine numpy` for the identical vectorised simulator (`src/fastsim.py`). | No |
 | `python main.py hardware` | The same idle experiment on a real IBM device, with and without DD. | Yes |
 | `python main.py hardware --fake` | Dry run of the hardware pipeline on an offline fake device. Checks the code path only (see limitations). | No |
 
-Outputs (a PNG plus, for hardware, a JSON with raw counts) are written to `results/`.
+Outputs (a PNG plus, for hardware, a JSON with raw counts) are written to `results/` next to `main.py`, whichever folder you run it from. `--noise` accepts `1/f`, `lorentzian`, `white` or `static` (one constant offset per run, the textbook spin-echo case).
 
 ### Sample output of the offline experiments
 
@@ -107,14 +107,28 @@ What it shows:
 
 ---
 
-## Setup (macOS, zsh)
+## Setup
+
+macOS / Linux (zsh or bash):
 
 ```zsh
-cd dd_demo
+cd backend/dd_demo
 python3 -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt
 cp .env.example .env        # then paste your IBM Quantum API key into .env
 ```
+
+Windows (PowerShell):
+
+```powershell
+cd backend\dd_demo
+python -m venv .venv
+.\.venv\Scripts\python.exe -m pip install -r requirements.txt
+Copy-Item .env.example .env  # then paste your IBM Quantum API key into .env
+.\.venv\Scripts\Activate.ps1   # afterwards `python main.py ...` works as below
+```
+
+You can also reuse the repository's top-level `.venv` (`pip install -r backend/dd_demo/requirements.txt` on top of `backend/requirements.txt`).
 
 `.env`:
 
@@ -125,7 +139,7 @@ IBM_QUANTUM_INSTANCE=
 
 `IBM_QUANTUM_INSTANCE` is optional: set it to an instance name or CRN only if you have several. `.env` is in `.gitignore`; never commit it. If the token is blank, the code falls back to an account saved earlier with `QiskitRuntimeService.save_account(...)`.
 
-Tested with qiskit 2.5.2, qiskit-aer 0.17.2, qiskit-ibm-runtime 0.50.0, numpy 2.5.3, matplotlib 3.11.2. The code logs in on the `ibm_quantum_platform` channel, so very old qiskit-ibm-runtime versions may fail.
+Tested with qiskit 2.5.2, qiskit-aer 0.17.2, qiskit-ibm-runtime 0.50.0, numpy 2.5.3, matplotlib 3.11.2. The offline commands and tests also pass with qiskit-ibm-runtime 0.47.0 (the version pinned by the web app) on Python 3.13. The code logs in on the `ibm_quantum_platform` channel, so very old qiskit-ibm-runtime versions may fail.
 
 ---
 
@@ -148,6 +162,8 @@ python main.py hardware --backend ibm_quebec --qubit 5 --init y \
 | `--init` | x | `x` starts in |+>, `y` starts in |+i> |
 | `--modes` | none,runtime-XX,runtime-XY4 | Comma-separated list of the modes above |
 
+On Windows use `.\run.ps1` (or the same command with `python`); on macOS/Linux `./run.sh` runs it.
+
 Each mode is one job containing all delays. Real QPU time is limited on most plans, so check your allowance, and start small (`--points 6 --shots 1000`) the first time.
 
 Output files in `results/`: `hardware_<backend>_<timestamp>.png` and `.json` (delays, P(0) per mode, and raw counts).
@@ -161,17 +177,20 @@ For a fair comparison across runs, pin the same backend and qubit, and interleav
 ```
 dd_demo/
 ├── main.py              # CLI: theory | local | hardware
-├── conftest.py          # empty; lets plain `pytest` find src/
+├── conftest.py          # lets plain `pytest` find src/
 ├── requirements.txt
 ├── .env.example         # copy to .env and add your token
+├── run.sh / run.ps1     # the hardware example command (macOS-Linux / Windows)
 ├── src/
 │   ├── sequences.py     # Hahn, CPMG, XY4, UDD pulse timings (pure Python)
-│   ├── noise.py         # 1/f, Lorentzian and white noise generators
+│   ├── noise.py         # 1/f, Lorentzian, white and static noise generators
 │   ├── theory.py        # switching-function dephasing model
 │   ├── circuits.py      # local noisy-idle circuits and the hardware Ramsey circuit
+│   ├── fastsim.py       # vectorised NumPy twin of noisy_idle_circuit + Bloch trajectories
+│   ├── game.py          # seeded levels and sequence explorer for the web game
 │   ├── ibm.py           # token loading, backend choice, offline fake backend
-│   ├── runner.py        # transpile, DD modes (runtime option / manual pass), SamplerV2
-│   ├── analysis.py      # P(0) from counts, JSON saving
+│   ├── runner.py        # transpile, DD modes, SamplerV2 (blocking run or submit-only)
+│   ├── analysis.py      # P(0) and error bars from counts, saved-result loading, JSON saving
 │   └── plotting.py      # matplotlib helper
 ├── tests/test_basics.py
 └── results/             # plots and JSON land here
@@ -190,11 +209,13 @@ python -m src.sequences
 python -m src.noise
 python -m src.theory
 python -m src.circuits
+python -m src.fastsim      # checks the NumPy simulator against Qiskit Statevector
+python -m src.game         # the web game's levels behave as designed
 python -m src.ibm          # also tests your login if a token is set
 python -m src.runner       # offline, about 30 s
 python -m src.analysis
 python -m src.plotting
-pytest                     # unit tests (or: python -m pytest)
+pytest                     # unit tests (or: python -m pytest, or python -m unittest discover -s tests)
 ```
 
 Quick smoke test of the whole CLI:
@@ -207,6 +228,21 @@ python main.py hardware --fake --points 3 --max-delay-us 60 --shots 300 --modes 
 ```
 
 ---
+
+---
+
+## In the CODFISH web app
+
+The web game imports this package as `backend.dd_demo.src` (see `backend/dd_api.py`); it needs only `backend/requirements.txt`, not matplotlib, qiskit-aer or python-dotenv.
+
+| Endpoint | Uses |
+|---|---|
+| `GET /api/dd/levels`, `POST /api/dd/play` | `game.py` levels, scored with `fastsim.py`, plus an animation of 12 sample spins |
+| `POST /api/dd/explore` | `theory.coherence_curve` (theory) or `fastsim` (circuit) curves, like `main.py theory/local` |
+| `GET /api/dd/hardware[/<id>]` | every `results/hardware_*.json`, with binomial error bars |
+| `POST /api/dd/hardware/runs`, `GET /api/dd/hardware/runs/<id>` | `runner.submit_sweep` on a real IBM backend (needs `IBM_ENABLE=true` and the IBM variables), saved in the same JSON format as the CLI |
+
+The game reports **signal = 2·P(0) − 1**: 1 = state kept, 0 = scrambled, negative = rotated towards the opposite state.
 
 ## Limitations and known caveats
 

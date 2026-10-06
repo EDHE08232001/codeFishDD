@@ -43,24 +43,31 @@ def add_manual_dd(backend, circuits):
     return pm.run(circuits)
 
 
-def run_sweep(backend, circuits, mode: str, shots: int):
-    """Run all circuits in one job; returns a list of count dicts."""
+MODES = ("none", *(f"runtime-{seq}" for seq in sorted(RUNTIME_SEQS)), "manual-XX")
+
+
+def submit_sweep(backend, circuits, mode: str, shots: int):
+    """Submit all circuits as one job without waiting; returns the runtime job."""
+    if mode not in MODES:
+        raise ValueError(f"Unknown mode '{mode}'. Use one of {', '.join(MODES)}")
     sampler = SamplerV2(mode=backend)
     if mode.startswith("runtime-"):
-        seq = mode.split("-", 1)[1]
-        if seq not in RUNTIME_SEQS:
-            raise ValueError(f"runtime sequence must be one of {RUNTIME_SEQS}")
         sampler.options.dynamical_decoupling.enable = True
-        sampler.options.dynamical_decoupling.sequence_type = seq
+        sampler.options.dynamical_decoupling.sequence_type = mode.split("-", 1)[1]
     elif mode == "manual-XX":
         circuits = add_manual_dd(backend, circuits)
-    elif mode != "none":
-        raise ValueError(f"Unknown mode '{mode}'")
+    return sampler.run(circuits, shots=shots)
 
-    job = sampler.run(circuits, shots=shots)
-    print(f"  [{mode}] job id: {job.job_id()}")
-    result = job.result()
+
+def counts_from_result(result) -> list[dict[str, int]]:
     return [r.data.c.get_counts() for r in result]
+
+
+def run_sweep(backend, circuits, mode: str, shots: int):
+    """Run all circuits in one job; returns a list of count dicts."""
+    job = submit_sweep(backend, circuits, mode, shots)
+    print(f"  [{mode}] job id: {job.job_id()}")
+    return counts_from_result(job.result())
 
 
 def count_dd_pulses(circuit) -> int:

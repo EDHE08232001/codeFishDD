@@ -1,9 +1,10 @@
 import React, {useState} from 'react';
 import Codfish from './Codfish';
+import DDGame from './DDGame';
 
 const tools=[
   {id:'zne',name:'ZNE',icon:'↗',title:'Noise Detective',task:'Estimate the result at zero noise.',goal:'Compare measurements at several noise factors, then extrapolate to zero.',problem:'Noise changes my measured mean. How can I estimate its ideal value?'},
-  {id:'dd',name:'Dynamical Decoupling',icon:'▥',title:'Pulse Patrol',task:'Protect an idle qubit.',goal:'Place an echo pulse to cancel a simple, constant phase drift.',problem:'My qubit drifts while it waits. Which tool acts during the idle time?'},
+  {id:'dd',name:'Dynamical Decoupling',icon:'▥',title:'Pulse Patrol',task:'Protect an idle qubit.',goal:'Flip an idle qubit with pulse sequences to cancel slow phase drift, then compare with real IBM hardware data.',problem:'My qubit drifts while it waits. Which tool acts during the idle time?'},
   {id:'twirl',name:'Pauli Twirling',icon:'⟳',title:'Shuffle the Error',task:'Turn aligned errors into varied errors.',goal:'Randomize equivalent circuit frames and observe how error directions change.',problem:'My errors keep pointing the same way. Which tool can randomize them?'},
   {id:'trex',name:'Readout Mitigation',icon:'▦',title:'Detector Decoder',task:'Calibrate a biased detector.',goal:'Use known inputs to estimate readout errors and correct a measured distribution.',problem:'The circuit finishes, but my detector sometimes reads the wrong bit.'},
   {id:'pec',name:'PEC',icon:'±',title:'Signed Sample Lab',task:'Combine samples with signed weights.',goal:'Explore how inverse-noise weights can remove bias while increasing sampling cost.',problem:'I know a noise model. Can weighted noisy experiments estimate an ideal result?'},
@@ -11,20 +12,13 @@ const tools=[
 ];
 
 function MiniGame({tool}){
-  const [choice,setChoice]=useState(null),[count,setCount]=useState(0),[samples,setSamples]=useState([]);
+  const [count,setCount]=useState(0),[samples,setSamples]=useState([]);
   const [calibration,setCalibration]=useState(false),[answer,setAnswer]=useState('');
   const total=samples.reduce((a,b)=>a+b,0),shots=samples.length;
   return <section className="mini-game">
     <div className="eyebrow">INTERACTIVE CONCEPT DEMO · {tool.name.toUpperCase()}</div>
     <h1>{tool.title}</h1><p className="game-goal">{tool.goal}</p>
     <p className="notice">Simplified teaching model. This activity does not submit IBM jobs.</p>
-    {tool.id==='dd'&&<>
-      <h2>One idle interval. Where should the echo pulse go?</h2>
-      <div className="pixel-track">{['Start','¼','½','¾','End'].map((v,i)=><button className={choice===i?'selected':''} key={v} onClick={()=>setChoice(i)}>{v}<br/>{choice===i?'⚡':'·'}</button>)}</div>
-      <div className="signal-meter"><span style={{width:`${choice===null?100:Math.abs(2*choice/4-1)*100}%`}}/></div>
-      <p>Residual phase drift: {choice===null?'100':Math.round(Math.abs(2*choice/4-1)*100)}%</p>
-      {choice!==null&&<div className="lesson-feedback">{choice===2?'Balanced!':'Try balancing the time on each side.'} In this constant-drift echo model, the pulse reverses the sign of phase accumulation. Equal waiting times cancel that drift. Real DD uses pulse sequences; it cannot cancel every kind of noise.</div>}
-    </>}
     {tool.id==='twirl'&&<>
       <h2>Six small errors point in one direction.</h2>
       <div className="error-arrows">{Array.from({length:6},(_,i)=><span key={i}>{count===0?'→':i%2?'←':'→'}</span>)}</div>
@@ -117,7 +111,7 @@ export default function LearningHub({ZNEGame}){
   }
   if(screen==='cover')return <main className="cover-screen"><div className="cover-frame"><div className="cover-brand"><span className="codfish-brand"><Codfish/> TEAM CODFISH</span><span>✦ SIX LEARNING MODULES</span></div><div className="cover-title"><div className="eyebrow">WELCOME TO THE CODFISH RESEARCH REEF</div><div className="team-wordmark">CODFISH</div><h1>QUANTUM<br/><span>REEF</span></h1><p>Dive into a sea of quantum mysteries.<br/>Join our codfish crew. Dive into the reef and rescue quantum signals.</p></div><PixelLab/><div className="cover-menu"><button onClick={()=>setScreen('hub')}>▶ Start mission</button><button className="secondary" onClick={()=>setScreen('guide')}>▦ Explore tools</button></div><p className="cover-caption">DIVE IN · EXPERIMENT · SAVE THE SIGNAL</p></div></main>;
   if(screen==='guide')return <main className="quest-hub"><button className="secondary" onClick={()=>setScreen('cover')}>← Main menu</button><h1>Your reef toolkit</h1><p>Each tool solves a different part of the noise puzzle.</p><section className="tool-grid">{tools.map(tool=><article key={tool.id} className="tool-card"><span className="pixel-icon">{tool.icon}</span><h2>{tool.name}</h2><p>{tool.goal}</p><button onClick={()=>{setScreen('hub');setActive(tool);}}>Try this mini-game →</button></article>)}</section></main>;
-  if(active)return <><nav className="game-nav"><button className="secondary" onClick={()=>setActive(null)}>← Mission hub</button><span>CODFISH / {active.name.toUpperCase()}</span></nav>{active.id==='zne'?<ZNEGame/>:<main><MiniGame key={active.id} tool={active}/></main>}</>;
+  if(active)return <><nav className="game-nav"><button className="secondary" onClick={()=>setActive(null)}>← Mission hub</button><span>CODFISH / {active.name.toUpperCase()}</span></nav>{active.id==='zne'?<ZNEGame/>:active.id==='dd'?<DDGame/>:<main><MiniGame key={active.id} tool={active}/></main>}</>;
   return <main className="quest-hub focused-mission">
     <div className="quest-top"><button className="secondary" onClick={()=>setScreen('cover')}>← Main menu</button><span className="codfish-brand"><Codfish/> CODFISH</span><button className="secondary" onClick={()=>setScreen('guide')}>Explore tools ↗</button></div>
     <div className="mission-progress focused-progress" aria-label={`${completed.length} of 6 missions completed`}>{tools.map((tool,i)=><button key={tool.id} className={`${completed.includes(tool.id)?'finished':''} ${mission===i?'current':''}`} aria-label={`Mission ${i+1}${completed.includes(tool.id)?', completed':''}`} aria-current={mission===i?'step':undefined} onClick={()=>changeMission(i)}>{completed.includes(tool.id)?'✓':String(i+1).padStart(2,'0')}</button>)}<span>{completed.length} / 6 completed</span></div>
@@ -130,6 +124,6 @@ export default function LearningHub({ZNEGame}){
       {(feedback||solved)&&<div className={`answer-feedback ${solved?'feedback-correct':''}`} role="status"><strong>{solved?'✓ You found the right tool!':'Try again — here is a clue.'}</strong><p>{solved?current.goal:feedback}</p>{solved&&<div className="result-actions"><button onClick={()=>setActive(current)}>Try it yourself →</button><button className="secondary" onClick={()=>changeMission((mission+1)%tools.length)}>{mission===5?'Back to mission 1':'Next mission'} →</button></div>}</div>}
       {completed.length===tools.length&&<p className="all-complete">✓ All six missions complete! Keep exploring the reef toolkit.</p>}
     </section>
-    <p className="hub-note">These are mitigation techniques and calibration tools, not interchangeable curve models. Each activity teaches a different mechanism. ZNE includes the existing backend experiment; the other modules are local concept demos.</p>
+    <p className="hub-note">These are mitigation techniques and calibration tools, not interchangeable curve models. Each activity teaches a different mechanism. ZNE and Dynamical Decoupling run backend experiments and include IBM hardware data; the other modules are local concept demos.</p>
   </main>;
 }
