@@ -16,9 +16,14 @@ A colorful pixel-art learning game about quantum noise and error mitigation. Bui
   - *Level 5*: real `ibm_quebec` measurements with and without DD, plus interpretation questions.
   - *IBM lab*: browse every saved hardware run and, when IBM is enabled, submit new DD jobs from the browser.
   - *Sandbox*: compare free / Hahn / CPMG / UDD / XY4 under any noise with the theory model or the exact circuit simulation.
-- Pauli twirling, readout mitigation, PEC, and noise learning: simplified local concept activities.
+- **Pauli twirling (Shuffle the Error)**: an interactive lab backed by `backend/twirl_demo`, running a transverse-field Ising quench unmitigated and twirled:
+  - *Learn*: what a Pauli frame is, plus a "shuffle it yourself" playground contrasting N with √N error growth.
+  - *Level 1*: the actual quench circuit drawn without and with Pauli frames, every frame listed, and a server-side proof that the noiseless outcome is identical.
+  - *Levels 2–4*: run both treatments on Qiskit Aer with a coherent ZZ crosstalk (twirling helps a lot), two-qubit depolarizing noise (twirling does nothing, because a Pauli channel is its own twirl), and both at once (only the coherent half goes).
+  - *Twirl lab*: choose Qiskit Aer or a real IBM processor, set the problem size, randomizations and shots per randomization, dial the noise, browse saved runs, and compare every run made in the session.
+- Readout mitigation, PEC, and noise learning: simplified local concept activities.
 
-The DD simulator (`backend/dd_demo/src/fastsim.py`) is tested against Qiskit `Statevector` to machine precision. The IBM data in level 5 are real measurements from a single qubit on a single day. **ZNE IBM hardware integration is not yet verified with a real job**, and the DD web submission path is tested with mocks only. The command-line `python main.py hardware` produced the bundled `ibm_quebec` result. QML is not implemented. Mission progress resets on refresh. Do not present synthetic teaching data as hardware measurements.
+The DD simulator (`backend/dd_demo/src/fastsim.py`) is tested against Qiskit `Statevector` to machine precision. The twirling module's frame tables are checked against explicit matrices and its twirled circuits against the bare statevector; its four scenario lessons are asserted in `backend/twirl_demo/src/game.py`. The IBM data in DD level 5 are real measurements from a single qubit on a single day. **ZNE IBM hardware integration is not yet verified with a real job**, and the DD and twirling web submission paths are tested with mocks only; the twirling hardware path has been verified offline against FakeTorino. The command-line `python main.py hardware` produced the bundled `ibm_quebec` result. QML is not implemented. Mission progress resets on refresh. Do not present synthetic teaching data as hardware measurements.
 
 ## Run locally
 
@@ -58,7 +63,7 @@ npm.cmd run dev        # macOS/Linux: npm run dev
 
 ## IBM credentials
 
-Set these before starting the services. Keep credentials out of Git and out of the browser. The same variables enable IBM mode for ZNE and for the DD lab.
+Set these before starting the services. Keep credentials out of Git and out of the browser. The same variables enable IBM mode for ZNE, the DD lab and the twirl lab.
 
 The easiest way is a `backend/.env` file (ignored by Git), which the backend loads on startup; variables already set in the shell take precedence:
 
@@ -87,19 +92,21 @@ export IBM_ENABLE=true IBM_QUANTUM_TOKEN='<your API key>' IBM_BACKEND='<backend>
 ./start-local.sh
 ```
 
-Restart the backend after changing configuration. The web app reads `backend/.env` (or a repo-root `.env`); the `dd_demo` command line reads `backend/dd_demo/.env` (see `backend/dd_demo/README.md`). IBM mode submits real jobs and uses your account allocation.
+Restart the backend after changing configuration. The web app reads `backend/.env` (or a repo-root `.env`); the standalone command lines read their own folder's `.env` (see `backend/dd_demo/README.md` and `backend/twirl_demo/README.md`). IBM mode submits real jobs and uses your account allocation.
 
 - **ZNE**: submits three manually folded circuits through SamplerV2. Python derives means from counts and fits the extrapolation; this is not built-in Sampler ZNE. The ideal reference is calculated separately. Mitigation is not guaranteed to improve a result.
 - **DD lab**: submits one Ramsey sweep per selected mode (no DD, IBM runtime XX / XpXm / XY4, or the manual `PadDynamicalDecoupling` pass) on the chosen qubit. When all jobs finish, the result is saved to `backend/dd_demo/results/hardware_<backend>_<timestamp>.json` and appears in the IBM lab. Only one DD hardware run can be active at a time.
+- **Twirl lab**: submits both treatments in a single job — the bare ISA circuit repeated, followed by the twirled randomizations — so that drifting device noise cannot favour one of them. The Pauli frames are added after transpilation using only `x` and `rz(π)`, and the Sampler's own gate twirling and dynamical decoupling are switched off. Hardware runs are capped at 32 randomizations and use `2 · randomizations · shots` shots in total. The result is saved to `backend/twirl_demo/results/twirl_<backend>_<timestamp>.json` and appears in the lab's saved-run list. Only one twirling hardware run can be active at a time.
 
 ## Validation
 
 macOS/Linux shown; on Windows use `.\.venv\Scripts\python.exe` and `npm.cmd`.
 
 ```zsh
-.venv/bin/python -m unittest discover -s backend/tests -v      # API, ZNE, DD game, mocked IBM paths
+.venv/bin/python -m unittest discover -s backend/tests -v      # API, ZNE, DD and twirling games, mocked IBM paths
 .venv/bin/python -m pip install -r backend/dd_demo/requirements.txt
 (cd backend/dd_demo && ../../.venv/bin/python -m pytest -q)     # standalone DD demo tests
+(cd backend/twirl_demo && ../../.venv/bin/python -m pytest -q)  # standalone twirling demo tests
 npm --prefix frontend run build
 ```
 
@@ -117,13 +124,16 @@ Use the actual launcher URL if its port differs. Backend tests use mocks and do 
 
 - `frontend/src/LearningHub.jsx`: cover, missions, toolkit, and concept activities.
 - `frontend/src/DDGame.jsx`: Pulse Patrol, the dynamical decoupling lab.
+- `frontend/src/TwirlGame.jsx`: Shuffle the Error, the Pauli twirling lab.
 - `frontend/src/Codfish.jsx`: pixel fish variants.
 - `frontend/src/main.jsx`: ZNE game and chart.
 - `backend/app.py`: experiment API and persisted runs.
 - `backend/dd_api.py`: `/api/dd/*` routes (levels, play, explore, hardware datasets, IBM runs).
+- `backend/twirl_api.py`: `/api/twirl/*` routes (scenarios, circuit preview, Aer runs, hardware datasets, IBM runs).
 - `backend/core.py`: sampling, means, fitting, and uncertainty.
 - `backend/ibm_adapter.py`: Qiskit circuits and IBM submission/results for ZNE, plus shared IBM credentials.
 - `backend/dd_demo/`: standalone DD package and CLI (theory, circuits, noise, IBM runner, game scenarios). See its README.
+- `backend/twirl_demo/`: standalone Pauli twirling package and CLI (TFIM quench, frame tables, Aer noise models, ISA twirling, IBM runner). See its README.
 - `start_local.py`, `start-local.sh`, `start-local.ps1`: launchers.
 - `docs/ZNE-technical-notes.md`: detailed ZNE notes in Chinese.
 
