@@ -402,7 +402,7 @@ function HardwareLab(){
       <HardwareChart data={data}/></div>}
     <section className="dd-run-panel" aria-label="Run on IBM hardware">
       <h3>Run your own experiment on IBM hardware</h3>
-      {!enabled&&<p className="notice">IBM runs are disabled on this server. To enable them, set IBM_ENABLE=true, IBM_QUANTUM_TOKEN, IBM_QUANTUM_INSTANCE and IBM_BACKEND before starting the backend (see README). Jobs use your QPU allocation.</p>}
+      {!enabled&&<p className="notice">IBM runs are disabled on this server. To enable them, set IBM_ENABLE=true, IBM_QUANTUM_TOKEN and IBM_BACKEND (IBM_QUANTUM_INSTANCE is optional) in backend/.env or the environment, then restart the backend (see README). Jobs use your QPU allocation.</p>}
       <div className="controls">
         <label>Qubit<input type="number" min="0" max="1000" value={form.qubit} disabled={!enabled||busy||pending} onChange={e=>set('qubit',e.target.value)}/></label>
         <label>Start state<select value={form.init} disabled={!enabled||busy||pending} onChange={e=>set('init',e.target.value)}><option value="x">|+⟩ (x)</option><option value="y">|+i⟩ (y)</option></select></label>

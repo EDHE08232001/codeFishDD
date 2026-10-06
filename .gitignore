@@ -19,3 +19,4 @@ backend/dd_demo/results/_plotting_demo.png
 backend/dd_demo/results/hardware_fake_*
 backend/dd_demo/.env
 .DS_Store
+._*

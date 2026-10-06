@@ -31,9 +31,10 @@ def service():
     if os.getenv('IBM_ENABLE', '').lower() != 'true':
         raise ValueError('IBM execution is disabled')
     token = os.getenv('IBM_QUANTUM_TOKEN')
-    instance = os.getenv('IBM_QUANTUM_INSTANCE')
-    if not token or not instance or not os.getenv('IBM_BACKEND'):
-        raise ValueError('Set IBM_QUANTUM_TOKEN, IBM_QUANTUM_INSTANCE and IBM_BACKEND on the server')
+    # Optional: without an instance, Qiskit Runtime picks one the token can access.
+    instance = os.getenv('IBM_QUANTUM_INSTANCE') or None
+    if not token or not os.getenv('IBM_BACKEND'):
+        raise ValueError('Set IBM_QUANTUM_TOKEN and IBM_BACKEND on the server')
     return QiskitRuntimeService(channel='ibm_quantum_platform', token=token, instance=instance)
 
 def submit(shots):
