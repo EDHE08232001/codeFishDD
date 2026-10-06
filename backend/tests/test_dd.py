@@ -114,6 +114,9 @@ class DDAPITests(unittest.TestCase):
             self.assertEqual(self.client.post('/api/dd/hardware/runs', json={}).status_code, 403)
         with patch.dict(os.environ, {'IBM_ENABLE':'true','IBM_QUANTUM_TOKEN':'','IBM_QUANTUM_INSTANCE':'','IBM_BACKEND':''}):
             self.assertEqual(self.client.post('/api/dd/hardware/runs', json={}).status_code, 503)
+        with patch.dict(os.environ, {'IBM_ENABLE':'true','IBM_QUANTUM_TOKEN':'t','IBM_QUANTUM_INSTANCE':'','IBM_BACKEND':'b'}), \
+             patch.object(dd_api.POOL, 'submit'):
+            self.assertEqual(self.client.post('/api/dd/hardware/runs', json={}).status_code, 202)  # instance is optional
         self.assertEqual(self.client.post('/api/dd/hardware/runs', json={'modes':['bad']}).status_code, 422)
         self.assertEqual(self.client.get('/api/dd/hardware/runs/not-a-uuid').status_code, 404)
 
@@ -122,7 +125,7 @@ class DDAPITests(unittest.TestCase):
         submitted = []
         class FakeSampler:
             def __init__(self, mode):
-                self.options = SimpleNamespace(dynamical_decoupling=SimpleNamespace(enable=False, sequence_type=None))
+                self.options = SimpleNamespace(dynamical_decoupling=SimpleNamespace(enable=None, sequence_type=None))
             def run(self, circuits, shots):
                 submitted.append((self.options.dynamical_decoupling.enable, sum(c.count_ops().get('x',0) for c in circuits), shots))
                 return SimpleNamespace(job_id=lambda: f'job-{len(submitted)}')
@@ -150,7 +153,8 @@ class DDAPITests(unittest.TestCase):
         self.assertEqual([s['mode'] for s in data['series']], ['none','runtime-XY4','manual-XX'])
         self.assertEqual(data['series'][0]['p0'], [0.9,0.7,0.6])
         self.assertEqual(submitted[0], (False, 0, 500))
-        self.assertTrue(submitted[1][0])
+        self.assertIs(submitted[1][0], True)
+        self.assertIs(submitted[2][0], False)  # manual-XX pads circuits itself; runtime DD stays off
         self.assertEqual(submitted[2][1], 6)  # manual-XX: two X pulses per circuit
         saved = json.loads((results_dir/(done['dataset_id']+'.json')).read_text(encoding='utf-8'))
         self.assertEqual(saved['job_ids']['none'], 'job-1')

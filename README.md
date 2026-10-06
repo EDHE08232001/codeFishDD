@@ -60,10 +60,22 @@ npm.cmd run dev        # macOS/Linux: npm run dev
 
 Set these before starting the services. Keep credentials out of Git and out of the browser. The same variables enable IBM mode for ZNE and for the DD lab.
 
+The easiest way is a `backend/.env` file (ignored by Git), which the backend loads on startup; variables already set in the shell take precedence:
+
+```dotenv
+IBM_ENABLE=true
+IBM_QUANTUM_TOKEN=<your API key>
+IBM_BACKEND=ibm_quebec
+# Optional: only needed if your key can reach several instances and you want a specific one.
+IBM_QUANTUM_INSTANCE=
+```
+
+Or set them in the shell:
+
 ```powershell
 $env:IBM_ENABLE = 'true'
 $env:IBM_QUANTUM_TOKEN = '<your API key>'
-$env:IBM_QUANTUM_INSTANCE = '<your instance CRN>'
+$env:IBM_QUANTUM_INSTANCE = '<your instance CRN>'   # optional
 $env:IBM_BACKEND = '<accessible QPU backend>'
 .\.venv\Scripts\python.exe start_local.py
 ```
@@ -71,11 +83,11 @@ $env:IBM_BACKEND = '<accessible QPU backend>'
 macOS/Linux:
 
 ```zsh
-export IBM_ENABLE=true IBM_QUANTUM_TOKEN='<your API key>' IBM_QUANTUM_INSTANCE='<your instance CRN>' IBM_BACKEND='<backend>'
+export IBM_ENABLE=true IBM_QUANTUM_TOKEN='<your API key>' IBM_BACKEND='<backend>'   # IBM_QUANTUM_INSTANCE is optional
 ./start-local.sh
 ```
 
-Restart the backend after changing configuration. The web app does not load `.env` files; the `dd_demo` command line does (see `backend/dd_demo/README.md`). IBM mode submits real jobs and uses your account allocation.
+Restart the backend after changing configuration. The web app reads `backend/.env` (or a repo-root `.env`); the `dd_demo` command line reads `backend/dd_demo/.env` (see `backend/dd_demo/README.md`). IBM mode submits real jobs and uses your account allocation.
 
 - **ZNE**: submits three manually folded circuits through SamplerV2. Python derives means from counts and fits the extrapolation; this is not built-in Sampler ZNE. The ideal reference is calculated separately. Mitigation is not guaranteed to improve a result.
 - **DD lab**: submits one Ramsey sweep per selected mode (no DD, IBM runtime XX / XpXm / XY4, or the manual `PadDynamicalDecoupling` pass) on the chosen qubit. When all jobs finish, the result is saved to `backend/dd_demo/results/hardware_<backend>_<timestamp>.json` and appears in the IBM lab. Only one DD hardware run can be active at a time.

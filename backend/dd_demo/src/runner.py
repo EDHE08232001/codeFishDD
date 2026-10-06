@@ -51,8 +51,9 @@ def submit_sweep(backend, circuits, mode: str, shots: int):
     if mode not in MODES:
         raise ValueError(f"Unknown mode '{mode}'. Use one of {', '.join(MODES)}")
     sampler = SamplerV2(mode=backend)
+    # Set DD explicitly so the baseline never depends on the service default.
+    sampler.options.dynamical_decoupling.enable = mode.startswith("runtime-")
     if mode.startswith("runtime-"):
-        sampler.options.dynamical_decoupling.enable = True
         sampler.options.dynamical_decoupling.sequence_type = mode.split("-", 1)[1]
     elif mode == "manual-XX":
         circuits = add_manual_dd(backend, circuits)

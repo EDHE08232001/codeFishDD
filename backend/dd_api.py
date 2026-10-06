@@ -173,7 +173,7 @@ def collect_ibm(run):
 def create_hardware_run(request: HardwareRequest):
     if not ibm_enabled():
         raise HTTPException(403, 'IBM execution is disabled on this server')
-    if not all(os.getenv(name) for name in ('IBM_QUANTUM_TOKEN', 'IBM_QUANTUM_INSTANCE', 'IBM_BACKEND')):
+    if not all(os.getenv(name) for name in ('IBM_QUANTUM_TOKEN', 'IBM_BACKEND')):
         raise HTTPException(503, 'IBM server configuration is incomplete')
     with LOCK:
         active = [json.loads(p.read_text(encoding='utf-8')) for p in DATA.glob('*.json')]
