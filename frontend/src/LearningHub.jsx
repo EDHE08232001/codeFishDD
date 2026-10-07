@@ -1,6 +1,7 @@
 import React, {useState} from 'react';
 import Codfish from './Codfish';
 import DDGame from './DDGame';
+import ZNEGame from './ZNEGame';
 import TwirlGame from './TwirlGame';
 import TRexGame from './TRexGame';
 import QubitsVsNoise from './QubitsVsNoise';
@@ -86,7 +87,7 @@ const scenes=[
 function MissionScene({scene}){
   return <figure className="mission-scene"><div className="scene-diagram">{scene.labels.map((label,i)=><React.Fragment key={label}>{i>0&&<span className="scene-arrow" aria-hidden="true">→</span>}<div className={`scene-node scene-node-${i}`}><span>{label}</span><strong>{scene.values[i]}</strong></div></React.Fragment>)}</div><figcaption>{scene.caption} <span>Illustrative teaching scenario.</span></figcaption></figure>;
 }
-export default function LearningHub({ZNEGame}){
+export default function LearningHub(){
   const [screen,setScreen]=useState('cover');
   const [active,setActive]=useState(null),[mission,setMission]=useState(0),[feedback,setFeedback]=useState('');
   const [completed,setCompleted]=useState([]);

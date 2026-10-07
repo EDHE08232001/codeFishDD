@@ -1,38 +1,27 @@
-"""Application setup; experiment implementations live in their own routers."""
+import json
+import logging
 import os
+import threading
+import uuid
+from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
-from dotenv import load_dotenv
-from fastapi import FastAPI
-from fastapi.middleware.cors import CORSMiddleware
+from typing import Literal
+from fastapi import APIRouter, HTTPException
+from pydantic import BaseModel, Field
 
-BACKEND_DIR = Path(__file__).resolve().parent
-load_dotenv(BACKEND_DIR / '.env')
-load_dotenv(BACKEND_DIR.parent / '.env')
+from .zne_demo.src.analysis import fit
+from .zne_demo.src.simulator import simulate
+from .zne_demo.src import hardware as ibm_adapter
 
-from .dd_api import router as dd_router
-from .twirl_api import router as twirl_router
-from .zne_api import router as zne_router
-from .trex_api import router as trex_router
-
-app = FastAPI(title='CODFISH Quantum Reef')
-frontend_port = int(os.getenv('ZNE_FRONTEND_PORT', '5173'))
-app.add_middleware(CORSMiddleware,
-    allow_origins=[f'http://localhost:{frontend_port}', f'http://127.0.0.1:{frontend_port}'],
-    allow_methods=['GET', 'POST'], allow_headers=['Content-Type'])
-app.include_router(dd_router)
-app.include_router(twirl_router)
-app.include_router(zne_router, prefix='/api/zne')
-# Preserve the existing health check, run links and saved-run location.
-app.include_router(zne_router, prefix='/api', include_in_schema=False)
-app.include_router(trex_router)
-DATA = BACKEND_DIR / 'data'
+router = APIRouter(tags=['zero-noise extrapolation'])
+DATA = Path(__file__).resolve().parent / 'data'
 LOCK = threading.RLock()
 POOL = ThreadPoolExecutor(max_workers=1)
 
 class RunRequest(BaseModel):
-    mode: Literal['teaching','ibm'] = 'teaching'
-    level: Literal['linear','exponential'] = 'linear'
-    shots: int = Field(default=2000, ge=100, le=10000)
+    mode: Literal['aer','ibm'] = 'aer'
+    level: Literal['linear','exponential'] = 'exponential'
+    shots: int = Field(default=4000, ge=100, le=10000)
     seed: int = Field(default=42, ge=0, le=2**32-1)
 
 class Guess(BaseModel):
@@ -67,7 +56,6 @@ def public(run):
 def submit_ibm(run_id):
     run = read(run_id)
     try:
-        from . import ibm_adapter
         details = ibm_adapter.submit(run['shots'])
         run.update(details, status='queued')
     except Exception:
@@ -75,11 +63,11 @@ def submit_ibm(run_id):
         run.update(status='failed', error='IBM submission failed; check backend logs and credentials.')
     save(run)
 
-@app.get('/api/health')
+@router.get('/health')
 def health():
     return {'ok':True, 'ibm_enabled':os.getenv('IBM_ENABLE','').lower()=='true'}
 
-@app.post('/api/runs', status_code=202)
+@router.post('/runs', status_code=202)
 def create_run(request: RunRequest):
     if request.mode == 'ibm':
         if os.getenv('IBM_ENABLE','').lower() != 'true':
@@ -95,18 +83,26 @@ def create_run(request: RunRequest):
         POOL.submit(submit_ibm, run['id'])
     else:
         run = dict(id=str(uuid.uuid4()), **request.model_dump(), status='completed',
-            source='Synthetic teaching model (not a quantum simulator)', reference=0.9,
-            points=simulate(request.level, request.shots, request.seed))
+            **simulate(request.level, request.shots, request.seed))
         save(run)
     return public(run)
 
-@app.get('/api/runs/{run_id}')
+@router.get('/runs/active')
+def active_run():
+    # Return the existing job so a refreshed page can resume polling.
+    # A completed remote job is returned once, with its refreshed measurements.
+    with LOCK:
+        candidates = [json.loads(p.read_text(encoding='utf-8')) for p in DATA.glob('*.json')]
+        active = next((r for r in candidates if r.get('mode')=='ibm'
+                       and r.get('status') not in ('completed','failed')), None)
+    return get_run(active['id']) if active else None
+
+@router.get('/runs/{run_id}')
 def get_run(run_id: str):
     with LOCK:
         run = read(run_id)
         if run['mode']=='ibm' and run['status'] in ('queued','running'):
             try:
-                from . import ibm_adapter
                 run.update(ibm_adapter.poll(run['job_id']))
                 run.pop('poll_error', None)
                 save(run)
@@ -115,7 +111,7 @@ def get_run(run_id: str):
                 run['poll_error'] = 'Could not refresh IBM job; try again.'
     return public(run)
 
-@app.post('/api/runs/{run_id}/reveal')
+@router.post('/runs/{run_id}/reveal')
 def reveal(run_id: str, request: Guess):
     run = read(run_id)
     if run['status'] != 'completed':
@@ -128,3 +124,4 @@ def reveal(run_id: str, request: Guess):
     return dict(**fitted, reference=ref, guess=request.guess,
         player_error=abs(request.guess-ref), fitted_error=abs(fitted['estimate']-ref),
         raw_error=abs(run['points'][0]['mean']-ref))
+
