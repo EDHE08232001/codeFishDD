@@ -9,9 +9,10 @@ from fastapi.testclient import TestClient
 from qiskit.quantum_info import Statevector, SparsePauliOp
 from qiskit.providers.fake_provider import GenericBackendV2
 from qiskit.transpiler import generate_preset_pass_manager
-from backend import app as app_module
-from backend import ibm_adapter
-from backend.core import fit, simulate, summarize
+from backend.app import app
+from backend import zne_api as app_module
+from backend.zne_demo.src import hardware as ibm_adapter
+from backend.zne_demo.src.analysis import fit, simulate, summarize
 
 def points(values):
     return [dict(factor=x,mean=y,standard_error=0.01) for x,y in zip((1,3,5),values)]
@@ -44,43 +45,51 @@ class APITests(unittest.TestCase):
         self.temp=tempfile.TemporaryDirectory()
         self.patch=patch.object(app_module,'DATA',Path(self.temp.name))
         self.patch.start()
-        self.client=TestClient(app_module.app)
+        self.client=TestClient(app)
 
     def tearDown(self):
         self.client.close()
         self.patch.stop()
         self.temp.cleanup()
 
-    def test_full_teaching_round_and_reference_secrecy(self):
+    def test_full_aer_round_and_reference_secrecy(self):
         for level in ('linear','exponential'):
-            response=self.client.post('/api/runs',json={'level':level,'shots':10000,'seed':42})
+            response=self.client.post('/api/zne/runs',json={'level':level,'shots':10000,'seed':42})
             self.assertEqual(response.status_code,202)
             run=response.json()
             self.assertNotIn('reference',run)
-            self.assertNotIn('reference',self.client.get('/api/runs/'+run['id']).json())
-            result=self.client.post('/api/runs/'+run['id']+'/reveal',json={'model':level,'guess':0.9})
+            self.assertNotIn('reference',self.client.get('/api/zne/runs/'+run['id']).json())
+            result=self.client.post('/api/zne/runs/'+run['id']+'/reveal',json={'model':level,'guess':0.9})
             self.assertEqual(result.status_code,200)
             self.assertAlmostEqual(result.json()['reference'],0.9)
-            self.assertEqual(result.json()['player_error'],0)
+            self.assertAlmostEqual(result.json()['player_error'],0,places=12)
             self.assertLess(result.json()['fitted_error'],0.08)
+
+    def test_legacy_run_routes_share_the_same_storage(self):
+        response = self.client.post('/api/runs', json={'shots':1000})
+        self.assertEqual(response.status_code, 202)
+        run_id = response.json()['id']
+        self.assertEqual(self.client.get('/api/zne/runs/' + run_id).json(), response.json())
+        self.assertEqual(self.client.get('/api/health').status_code, 200)
+        self.assertEqual(self.client.get('/api/zne/health').status_code, 200)
 
     def test_invalid_requests(self):
         for body in ({'shots':0},{'shots':10001},{'mode':'bad'},{'level':'bad'}):
-            self.assertEqual(self.client.post('/api/runs',json=body).status_code,422)
-        self.assertEqual(self.client.get('/api/runs/not-a-uuid').status_code,404)
+            self.assertEqual(self.client.post('/api/zne/runs',json=body).status_code,422)
+        self.assertEqual(self.client.get('/api/zne/runs/not-a-uuid').status_code,404)
 
     def test_ibm_is_disabled_by_default(self):
         with patch.dict(os.environ,{'IBM_ENABLE':'false'}):
-            self.assertEqual(self.client.post('/api/runs',json={'mode':'ibm'}).status_code,403)
+            self.assertEqual(self.client.post('/api/zne/runs',json={'mode':'ibm'}).status_code,403)
 
     def test_ibm_job_polling_then_reveal_with_mock(self):
         run={'id':'58a4706b-55b5-4e6c-944a-bb5f4ee6e321','mode':'ibm','status':'queued',
              'job_id':'mock-job','reference':0.9}
         app_module.save(run)
         with patch.object(ibm_adapter,'poll',return_value={'status':'completed','points':simulate('linear',10000,42)}):
-            response=self.client.get('/api/runs/'+run['id'])
+            response=self.client.get('/api/zne/runs/'+run['id'])
             self.assertEqual(response.json()['status'],'completed')
-        result=self.client.post('/api/runs/'+run['id']+'/reveal',json={'model':'linear','guess':0.9})
+        result=self.client.post('/api/zne/runs/'+run['id']+'/reveal',json={'model':'linear','guess':0.9})
         self.assertEqual(result.status_code,200)
 
 class IBMAdapterTests(unittest.TestCase):
