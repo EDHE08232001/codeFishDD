@@ -1,13 +1,13 @@
 import {test,expect} from '@playwright/test';
 async function openZNE(page){
   await page.goto('/');
-  await page.getByRole('button',{name:'▶ Start mission',exact:true}).click();
+  await page.getByRole('button',{name:'✦ Tool quiz',exact:true}).click();
   await page.getByRole('button',{name:'B ZNE',exact:true}).click();
   await page.getByRole('button',{name:'Try it yourself →',exact:true}).click();
 }
 test('mission feedback and progress survive navigation',async({page})=>{
   await page.goto('/');
-  await page.getByRole('button',{name:'▶ Start mission',exact:true}).click();
+  await page.getByRole('button',{name:'✦ Tool quiz',exact:true}).click();
   await page.getByRole('button',{name:'A Dynamical Decoupling',exact:true}).click();
   await expect(page.getByText('0 / 6 completed')).toBeVisible();
   await expect(page.getByText('Try again — here is a clue.')).toBeVisible();
