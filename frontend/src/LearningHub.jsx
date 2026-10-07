@@ -2,6 +2,7 @@ import React, {useState} from 'react';
 import Codfish from './Codfish';
 import DDGame from './DDGame';
 import TwirlGame from './TwirlGame';
+import QubitsVsNoise from './QubitsVsNoise';
 
 const tools=[
   {id:'zne',name:'ZNE',icon:'↗',title:'Noise Detective',task:'Estimate the result at zero noise.',goal:'Compare measurements at several noise factors, then extrapolate to zero.',problem:'Noise changes my measured mean. How can I estimate its ideal value?'},
@@ -11,6 +12,10 @@ const tools=[
   {id:'pec',name:'PEC',icon:'±',title:'Signed Sample Lab',task:'Combine samples with signed weights.',goal:'Explore how inverse-noise weights can remove bias while increasing sampling cost.',problem:'I know a noise model. Can weighted noisy experiments estimate an ideal result?'},
   {id:'learn',name:'Noise Learning',icon:'⌕',title:'Calibration Scout',task:'Discover an unknown error rate.',goal:'Spend a measurement budget on calibration and estimate an error probability.',problem:'Before choosing a correction, I need to characterize my device noise.'},
 ];
+const exploreTools=tools.filter(tool=>tool.id!=='pec'&&tool.id!=='learn');
+// Qubits vs Noise techniques that have a hands-on lab here, keyed by the game's unit id.
+const gameLabs=Object.fromEntries(exploreTools.map(tool=>[tool.id,tool.title]));
+const backLabels={game:'← Qubits vs Noise',guide:'← Reef toolkit',hub:'← Tool quiz'};
 
 function MiniGame({tool}){
   const [count,setCount]=useState(0),[samples,setSamples]=useState([]);
@@ -91,6 +96,7 @@ export default function LearningHub({ZNEGame}){
   const [active,setActive]=useState(null),[mission,setMission]=useState(0),[feedback,setFeedback]=useState('');
   const [completed,setCompleted]=useState([]);
   const [selected,setSelected]=useState(null);
+  const [gameLevel,setGameLevel]=useState(null);
   const current=tools[mission];
   const scene=scenes[mission];
   const solved=completed.includes(current.id);
@@ -104,9 +110,10 @@ export default function LearningHub({ZNEGame}){
       setFeedback(`Not quite. ${scene.hint}`);
     }
   }
-  if(screen==='cover')return <main className="cover-screen"><div className="cover-frame"><div className="cover-brand"><span className="codfish-brand"><Codfish/> TEAM CODFISH</span><span>✦ SIX LEARNING MODULES</span></div><div className="cover-title"><div className="eyebrow">WELCOME TO THE CODFISH RESEARCH REEF</div><div className="team-wordmark">CODFISH</div><h1>QUANTUM<br/><span>REEF</span></h1><p>Dive into a sea of quantum mysteries.<br/>Join our codfish crew. Dive into the reef and rescue quantum signals.</p></div><PixelLab/><div className="cover-menu"><button onClick={()=>setScreen('hub')}>▶ Start mission</button><button className="secondary" onClick={()=>setScreen('guide')}>▦ Explore tools</button></div><p className="cover-caption">DIVE IN · EXPERIMENT · SAVE THE SIGNAL</p></div></main>;
-  if(screen==='guide')return <main className="quest-hub"><button className="secondary" onClick={()=>setScreen('cover')}>← Main menu</button><h1>Your reef toolkit</h1><p>Each tool solves a different part of the noise puzzle.</p><section className="tool-grid">{tools.map(tool=><article key={tool.id} className="tool-card"><span className="pixel-icon">{tool.icon}</span><h2>{tool.name}</h2><p>{tool.goal}</p><button onClick={()=>{setScreen('hub');setActive(tool);}}>Try this mini-game →</button></article>)}</section></main>;
-  if(active)return <><nav className="game-nav"><button className="secondary" onClick={()=>setActive(null)}>← Mission hub</button><span>CODFISH / {active.name.toUpperCase()}</span></nav>{active.id==='zne'?<ZNEGame/>:active.id==='dd'?<DDGame/>:active.id==='twirl'?<TwirlGame/>:<main><MiniGame key={active.id} tool={active}/></main>}</>;
+  if(screen==='cover')return <main className="cover-screen"><div className="cover-frame"><div className="cover-brand"><span className="codfish-brand"><Codfish/> TEAM CODFISH</span><span>✦ SIX LEARNING MODULES</span></div><div className="cover-title"><div className="eyebrow">WELCOME TO THE CODFISH RESEARCH REEF</div><div className="team-wordmark">CODFISH</div><h1>QUANTUM<br/><span>REEF</span></h1><p>Dive into a sea of quantum mysteries.<br/>Join our codfish crew. Dive into the reef and rescue quantum signals.</p></div><PixelLab/><div className="cover-menu"><button onClick={()=>setScreen('game')}>▶ Start mission</button><button className="secondary" onClick={()=>setScreen('guide')}>▦ Explore tools</button><button className="secondary" onClick={()=>setScreen('hub')}>✦ Tool quiz</button></div><p className="cover-caption">DIVE IN · EXPERIMENT · SAVE THE SIGNAL</p></div></main>;
+  if(active)return <><nav className="game-nav"><button className="secondary" onClick={()=>setActive(null)}>{backLabels[screen]||'← Back'}</button><span>CODFISH / {active.name.toUpperCase()}</span></nav>{active.id==='zne'?<ZNEGame/>:active.id==='dd'?<DDGame/>:active.id==='twirl'?<TwirlGame/>:<main><MiniGame key={active.id} tool={active}/></main>}</>;
+  if(screen==='guide')return <main className="quest-hub"><button className="secondary" onClick={()=>setScreen('cover')}>← Main menu</button><h1>Your reef toolkit</h1><p>Each tool solves a different part of the noise puzzle.</p><section className="tool-grid">{exploreTools.map(tool=><article key={tool.id} className="tool-card"><span className="pixel-icon">{tool.icon}</span><h2>{tool.name}</h2><p>{tool.goal}</p><button onClick={()=>setActive(tool)}>Try this mini-game →</button></article>)}</section></main>;
+  if(screen==='game')return <QubitsVsNoise levelId={gameLevel} onLevel={setGameLevel} onExit={()=>setScreen('cover')} labs={gameLabs} onOpenLab={id=>setActive(tools.find(tool=>tool.id===id))}/>;
   return <main className="quest-hub focused-mission">
     <div className="quest-top"><button className="secondary" onClick={()=>setScreen('cover')}>← Main menu</button><span className="codfish-brand"><Codfish/> CODFISH</span><button className="secondary" onClick={()=>setScreen('guide')}>Explore tools ↗</button></div>
     <div className="mission-progress focused-progress" aria-label={`${completed.length} of 6 missions completed`}>{tools.map((tool,i)=><button key={tool.id} className={`${completed.includes(tool.id)?'finished':''} ${mission===i?'current':''}`} aria-label={`Mission ${i+1}${completed.includes(tool.id)?', completed':''}`} aria-current={mission===i?'step':undefined} onClick={()=>changeMission(i)}>{completed.includes(tool.id)?'✓':String(i+1).padStart(2,'0')}</button>)}<span>{completed.length} / 6 completed</span></div>
