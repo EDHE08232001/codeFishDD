@@ -1,7 +1,7 @@
 import {test,expect} from '@playwright/test';
 async function openTwirl(page){
   await page.goto('/');
-  await page.getByRole('button',{name:'▶ Start mission',exact:true}).click();
+  await page.getByRole('button',{name:'✦ Tool quiz',exact:true}).click();
   await page.getByRole('button',{name:'Mission 3',exact:true}).click();
   await page.getByRole('button',{name:'A Pauli Twirling',exact:true}).click();
   await page.getByRole('button',{name:'Try it yourself →',exact:true}).click();
