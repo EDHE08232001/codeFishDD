@@ -18,6 +18,7 @@ load_dotenv(BACKEND_DIR.parent / '.env')
 from .core import simulate, fit
 from .dd_api import router as dd_router
 from .twirl_api import router as twirl_router
+from .trex_api import router as trex_router
 
 app = FastAPI(title='ZNE Learning Game')
 frontend_port = int(os.getenv('ZNE_FRONTEND_PORT', '5173'))
@@ -25,6 +26,7 @@ app.add_middleware(CORSMiddleware, allow_origins=[f'http://localhost:{frontend_p
     allow_methods=['GET','POST'], allow_headers=['Content-Type'])
 app.include_router(dd_router)
 app.include_router(twirl_router)
+app.include_router(trex_router)
 DATA = BACKEND_DIR / 'data'
 LOCK = threading.RLock()
 POOL = ThreadPoolExecutor(max_workers=1)

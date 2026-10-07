@@ -2,6 +2,7 @@ import React, {useState} from 'react';
 import Codfish from './Codfish';
 import DDGame from './DDGame';
 import TwirlGame from './TwirlGame';
+import TRexGame from './TRexGame';
 
 const tools=[
   {id:'zne',name:'ZNE',icon:'↗',title:'Noise Detective',task:'Estimate the result at zero noise.',goal:'Compare measurements at several noise factors, then extrapolate to zero.',problem:'Noise changes my measured mean. How can I estimate its ideal value?'},
@@ -14,18 +15,12 @@ const tools=[
 
 function MiniGame({tool}){
   const [count,setCount]=useState(0),[samples,setSamples]=useState([]);
-  const [calibration,setCalibration]=useState(false),[answer,setAnswer]=useState('');
+  const [answer,setAnswer]=useState('');
   const total=samples.reduce((a,b)=>a+b,0),shots=samples.length;
   return <section className="mini-game">
     <div className="eyebrow">INTERACTIVE CONCEPT DEMO · {tool.name.toUpperCase()}</div>
     <h1>{tool.title}</h1><p className="game-goal">{tool.goal}</p>
     <p className="notice">Simplified teaching model. This activity does not submit IBM jobs.</p>
-    {tool.id==='trex'&&<>
-      <h2>The detector reports 66% zeros. Is that the true distribution?</h2>
-      <div className="distribution"><span style={{width:'66%'}}>0: 66%</span><span>1: 34%</span></div>
-      <button onClick={()=>setCalibration(true)}>Test known 0 and 1 inputs</button>
-      {calibration&&<><p>Calibration: P(read 0 | true 0) = 90%; P(read 0 | true 1) = 10%.</p><p>Measured zero fraction = 0.1 + 0.8 × true zero fraction.</p><div className="answer-buttons">{['66%','70%','90%'].map(v=><button key={v} onClick={()=>setAnswer(v)}>{v}</button>)}</div>{answer&&<div className="lesson-feedback">{answer==='70%'?'Correct!':'Use (0.66 − 0.10) / 0.80 = 0.70.'} Calibration estimates detector bias; correction estimates a distribution, not the true bit of each individual shot. This is a basic readout-calibration game, not a full TREX implementation.</div>}</>}
-    </>}
     {tool.id==='pec'&&<>
       <h2>A known bit-flip channel has error probability p = 0.1.</h2>
       <p>Its inverse combines two noisy branches: +1.125 × original and −0.125 × flipped. Select a weight to inspect it.</p>
@@ -106,7 +101,7 @@ export default function LearningHub({ZNEGame}){
   }
   if(screen==='cover')return <main className="cover-screen"><div className="cover-frame"><div className="cover-brand"><span className="codfish-brand"><Codfish/> TEAM CODFISH</span><span>✦ SIX LEARNING MODULES</span></div><div className="cover-title"><div className="eyebrow">WELCOME TO THE CODFISH RESEARCH REEF</div><div className="team-wordmark">CODFISH</div><h1>QUANTUM<br/><span>REEF</span></h1><p>Dive into a sea of quantum mysteries.<br/>Join our codfish crew. Dive into the reef and rescue quantum signals.</p></div><PixelLab/><div className="cover-menu"><button onClick={()=>setScreen('hub')}>▶ Start mission</button><button className="secondary" onClick={()=>setScreen('guide')}>▦ Explore tools</button></div><p className="cover-caption">DIVE IN · EXPERIMENT · SAVE THE SIGNAL</p></div></main>;
   if(screen==='guide')return <main className="quest-hub"><button className="secondary" onClick={()=>setScreen('cover')}>← Main menu</button><h1>Your reef toolkit</h1><p>Each tool solves a different part of the noise puzzle.</p><section className="tool-grid">{tools.map(tool=><article key={tool.id} className="tool-card"><span className="pixel-icon">{tool.icon}</span><h2>{tool.name}</h2><p>{tool.goal}</p><button onClick={()=>{setScreen('hub');setActive(tool);}}>Try this mini-game →</button></article>)}</section></main>;
-  if(active)return <><nav className="game-nav"><button className="secondary" onClick={()=>setActive(null)}>← Mission hub</button><span>CODFISH / {active.name.toUpperCase()}</span></nav>{active.id==='zne'?<ZNEGame/>:active.id==='dd'?<DDGame/>:active.id==='twirl'?<TwirlGame/>:<main><MiniGame key={active.id} tool={active}/></main>}</>;
+  if(active)return <><nav className="game-nav"><button className="secondary" onClick={()=>setActive(null)}>← Mission hub</button><span>CODFISH / {active.name.toUpperCase()}</span></nav>{active.id==='zne'?<ZNEGame/>:active.id==='dd'?<DDGame/>:active.id==='twirl'?<TwirlGame/>:active.id==='trex'?<TRexGame/>:<main><MiniGame key={active.id} tool={active}/></main>}</>;
   return <main className="quest-hub focused-mission">
     <div className="quest-top"><button className="secondary" onClick={()=>setScreen('cover')}>← Main menu</button><span className="codfish-brand"><Codfish/> CODFISH</span><button className="secondary" onClick={()=>setScreen('guide')}>Explore tools ↗</button></div>
     <div className="mission-progress focused-progress" aria-label={`${completed.length} of 6 missions completed`}>{tools.map((tool,i)=><button key={tool.id} className={`${completed.includes(tool.id)?'finished':''} ${mission===i?'current':''}`} aria-label={`Mission ${i+1}${completed.includes(tool.id)?', completed':''}`} aria-current={mission===i?'step':undefined} onClick={()=>changeMission(i)}>{completed.includes(tool.id)?'✓':String(i+1).padStart(2,'0')}</button>)}<span>{completed.length} / 6 completed</span></div>
