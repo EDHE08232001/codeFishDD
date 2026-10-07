@@ -317,10 +317,9 @@ All raw JSON (counts, job IDs, exact delays) backing these tables is committed i
 - Qiskit, Qiskit Aer and Qiskit IBM Runtime documentation and tutorials (IBM Quantum), used throughout for API usage (`SamplerV2`, `generate_preset_pass_manager`, `AerSimulator`, noise-model construction).
 
 **Team contributions** (from the repository's commit history):
-- **OscarTung** — initial project scaffold ("Add CODFISH Quantum Reef learning prototype"); extracted the ZNE module into its own package with Aer and IBM support; homepage two-column layout.
+- **PingYi,Tung** — initial project scaffold ("Add CODFISH Quantum Reef learning prototype"); extracted the ZNE module into its own package with Aer and IBM support; homepage two-column layout.
 - **Edward He** — dynamical decoupling integration into the web app; ported and restyled the Qubits vs Noise mission (with AI pair-programming assistance, see below); repository README maintenance.
-- **paaik** — the Pauli twirling module (`backend/twirl_demo`, `backend/twirl_api.py`, `TwirlGame.jsx`).
+- **Hanna Paik** — the Pauli twirling module (`backend/twirl_demo`, `backend/twirl_api.py`, `TwirlGame.jsx`).
 - **Thao Phan** — the readout-mitigation / Detector Decoder module (`backend/trex_demo`, `backend/trex_api.py`, `TRexGame.jsx`); overall integration, PR review and merges across all modules; this README.
-- **Claude (Anthropic)** — used as an AI pair-programming assistant for parts of the dynamical-decoupling module, the Qubits-vs-Noise port, IBM credential plumbing, and (this session) fixing a routing bug that left the Detector Decoder lab unreachable from the hub, setting up the PINQ²/IBM `.env` workflow, and drafting this README from the project's own code, tests and committed hardware results.
 
 Questions, corrections to the attribution above, or requests to extend any of the four labs are welcome — open an issue or see each lab's own `README.md` under `backend/<name>_demo/` for implementation detail this file intentionally summarizes rather than repeats.
