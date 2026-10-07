@@ -11,6 +11,7 @@ const tools=[
   {id:'pec',name:'PEC',icon:'±',title:'Signed Sample Lab',task:'Combine samples with signed weights.',goal:'Explore how inverse-noise weights can remove bias while increasing sampling cost.',problem:'I know a noise model. Can weighted noisy experiments estimate an ideal result?'},
   {id:'learn',name:'Noise Learning',icon:'⌕',title:'Calibration Scout',task:'Discover an unknown error rate.',goal:'Spend a measurement budget on calibration and estimate an error probability.',problem:'Before choosing a correction, I need to characterize my device noise.'},
 ];
+const exploreTools=tools.filter(tool=>tool.id!=='pec'&&tool.id!=='learn');
 
 function MiniGame({tool}){
   const [count,setCount]=useState(0),[samples,setSamples]=useState([]);
@@ -105,7 +106,7 @@ export default function LearningHub({ZNEGame}){
     }
   }
   if(screen==='cover')return <main className="cover-screen"><div className="cover-frame"><div className="cover-brand"><span className="codfish-brand"><Codfish/> TEAM CODFISH</span><span>✦ SIX LEARNING MODULES</span></div><div className="cover-title"><div className="eyebrow">WELCOME TO THE CODFISH RESEARCH REEF</div><div className="team-wordmark">CODFISH</div><h1>QUANTUM<br/><span>REEF</span></h1><p>Dive into a sea of quantum mysteries.<br/>Join our codfish crew. Dive into the reef and rescue quantum signals.</p></div><PixelLab/><div className="cover-menu"><button onClick={()=>setScreen('hub')}>▶ Start mission</button><button className="secondary" onClick={()=>setScreen('guide')}>▦ Explore tools</button></div><p className="cover-caption">DIVE IN · EXPERIMENT · SAVE THE SIGNAL</p></div></main>;
-  if(screen==='guide')return <main className="quest-hub"><button className="secondary" onClick={()=>setScreen('cover')}>← Main menu</button><h1>Your reef toolkit</h1><p>Each tool solves a different part of the noise puzzle.</p><section className="tool-grid">{tools.map(tool=><article key={tool.id} className="tool-card"><span className="pixel-icon">{tool.icon}</span><h2>{tool.name}</h2><p>{tool.goal}</p><button onClick={()=>{setScreen('hub');setActive(tool);}}>Try this mini-game →</button></article>)}</section></main>;
+  if(screen==='guide')return <main className="quest-hub"><button className="secondary" onClick={()=>setScreen('cover')}>← Main menu</button><h1>Your reef toolkit</h1><p>Each tool solves a different part of the noise puzzle.</p><section className="tool-grid">{exploreTools.map(tool=><article key={tool.id} className="tool-card"><span className="pixel-icon">{tool.icon}</span><h2>{tool.name}</h2><p>{tool.goal}</p><button onClick={()=>{setScreen('hub');setActive(tool);}}>Try this mini-game →</button></article>)}</section></main>;
   if(active)return <><nav className="game-nav"><button className="secondary" onClick={()=>setActive(null)}>← Mission hub</button><span>CODFISH / {active.name.toUpperCase()}</span></nav>{active.id==='zne'?<ZNEGame/>:active.id==='dd'?<DDGame/>:active.id==='twirl'?<TwirlGame/>:<main><MiniGame key={active.id} tool={active}/></main>}</>;
   return <main className="quest-hub focused-mission">
     <div className="quest-top"><button className="secondary" onClick={()=>setScreen('cover')}>← Main menu</button><span className="codfish-brand"><Codfish/> CODFISH</span><button className="secondary" onClick={()=>setScreen('guide')}>Explore tools ↗</button></div>
