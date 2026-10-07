@@ -2,6 +2,7 @@ import React, {useState} from 'react';
 import Codfish from './Codfish';
 import DDGame from './DDGame';
 import TwirlGame from './TwirlGame';
+import TRexGame from './TRexGame';
 import QubitsVsNoise from './QubitsVsNoise';
 
 const tools=[
@@ -19,18 +20,12 @@ const backLabels={game:'← Qubits vs Noise',guide:'← Reef toolkit',hub:'← T
 
 function MiniGame({tool}){
   const [count,setCount]=useState(0),[samples,setSamples]=useState([]);
-  const [calibration,setCalibration]=useState(false),[answer,setAnswer]=useState('');
+  const [answer,setAnswer]=useState('');
   const total=samples.reduce((a,b)=>a+b,0),shots=samples.length;
   return <section className="mini-game">
     <div className="eyebrow">INTERACTIVE CONCEPT DEMO · {tool.name.toUpperCase()}</div>
     <h1>{tool.title}</h1><p className="game-goal">{tool.goal}</p>
     <p className="notice">Simplified teaching model. This activity does not submit IBM jobs.</p>
-    {tool.id==='trex'&&<>
-      <h2>The detector reports 66% zeros. Is that the true distribution?</h2>
-      <div className="distribution"><span style={{width:'66%'}}>0: 66%</span><span>1: 34%</span></div>
-      <button onClick={()=>setCalibration(true)}>Test known 0 and 1 inputs</button>
-      {calibration&&<><p>Calibration: P(read 0 | true 0) = 90%; P(read 0 | true 1) = 10%.</p><p>Measured zero fraction = 0.1 + 0.8 × true zero fraction.</p><div className="answer-buttons">{['66%','70%','90%'].map(v=><button key={v} onClick={()=>setAnswer(v)}>{v}</button>)}</div>{answer&&<div className="lesson-feedback">{answer==='70%'?'Correct!':'Use (0.66 − 0.10) / 0.80 = 0.70.'} Calibration estimates detector bias; correction estimates a distribution, not the true bit of each individual shot. This is a basic readout-calibration game, not a full TREX implementation.</div>}</>}
-    </>}
     {tool.id==='pec'&&<>
       <h2>A known bit-flip channel has error probability p = 0.1.</h2>
       <p>Its inverse combines two noisy branches: +1.125 × original and −0.125 × flipped. Select a weight to inspect it.</p>
