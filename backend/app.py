@@ -6,16 +6,24 @@ import uuid
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 from typing import Literal
+from dotenv import load_dotenv
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
+# backend/.env (then a repo-root .env) supplies IBM settings; real environment variables win.
+BACKEND_DIR = Path(__file__).resolve().parent
+load_dotenv(BACKEND_DIR / '.env')
+load_dotenv(BACKEND_DIR.parent / '.env')
+
 from .core import simulate, fit
+from .dd_api import router as dd_router
 
 app = FastAPI(title='ZNE Learning Game')
 frontend_port = int(os.getenv('ZNE_FRONTEND_PORT', '5173'))
 app.add_middleware(CORSMiddleware, allow_origins=[f'http://localhost:{frontend_port}',f'http://127.0.0.1:{frontend_port}'],
     allow_methods=['GET','POST'], allow_headers=['Content-Type'])
-DATA = Path(__file__).resolve().parent / 'data'
+app.include_router(dd_router)
+DATA = BACKEND_DIR / 'data'
 LOCK = threading.RLock()
 POOL = ThreadPoolExecutor(max_workers=1)
 
@@ -74,7 +82,7 @@ def create_run(request: RunRequest):
     if request.mode == 'ibm':
         if os.getenv('IBM_ENABLE','').lower() != 'true':
             raise HTTPException(403, 'IBM execution is disabled on this server')
-        if not all(os.getenv(name) for name in ('IBM_QUANTUM_TOKEN','IBM_QUANTUM_INSTANCE','IBM_BACKEND')):
+        if not all(os.getenv(name) for name in ('IBM_QUANTUM_TOKEN','IBM_BACKEND')):
             raise HTTPException(503, 'IBM server configuration is incomplete')
         with LOCK:
             active = [json.loads(p.read_text(encoding='utf-8')) for p in DATA.glob('*.json')]
