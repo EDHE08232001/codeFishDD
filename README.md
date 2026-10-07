@@ -13,7 +13,7 @@ A colorful pixel-art learning game about quantum noise and error mitigation. Bui
   - A Quantum Almanac (techniques, errors, matchups, practice quiz) and a How to play page.
   - Progress and stars are saved in the browser (`localStorage`); open `/?unlockAll` to play any level. Everything runs in the browser; it does not call the backend.
 - **Tool quiz**: six scenario questions with three answer choices, hints, completion checks, and session progress.
-- A separate toolkit for exploring each mini-game.
+- **Explore tools**: a toolkit with four directly playable modules: ZNE, dynamical decoupling, Pauli twirling, and readout mitigation. PEC and noise learning remain available as local concept activities from the tool quiz.
 - ZNE: backend-generated teaching measurements, linear/exponential extrapolation, and an optional IBM hardware adapter.
 - **Dynamical decoupling (Pulse Patrol)**: an interactive lab backed by `backend/dd_demo`:
   - *Learn*: what DD is, plus a real-time "flip it yourself" spin-echo playground.
@@ -26,7 +26,7 @@ A colorful pixel-art learning game about quantum noise and error mitigation. Bui
   - *Level 1*: the actual quench circuit drawn without and with Pauli frames, every frame listed, and a server-side proof that the noiseless outcome is identical.
   - *Levels 2–4*: run both treatments on Qiskit Aer with a coherent ZZ crosstalk (twirling helps a lot), two-qubit depolarizing noise (twirling does nothing, because a Pauli channel is its own twirl), and both at once (only the coherent half goes).
   - *Twirl lab*: choose Qiskit Aer or a real IBM processor, set the problem size, randomizations and shots per randomization, dial the noise, browse saved runs, and compare every run made in the session.
-- Readout mitigation, PEC, and noise learning: simplified local concept activities.
+- **Local concept activities**: simplified readout mitigation, PEC, and noise learning lessons that do not submit IBM jobs.
 
 The DD simulator (`backend/dd_demo/src/fastsim.py`) is tested against Qiskit `Statevector` to machine precision. The twirling module's frame tables are checked against explicit matrices and its twirled circuits against the bare statevector; its four scenario lessons are asserted in `backend/twirl_demo/src/game.py`. The IBM data in DD level 5 are real measurements from a single qubit on a single day. **ZNE IBM hardware integration is not yet verified with a real job**, and the DD and twirling web submission paths are tested with mocks only; the twirling hardware path has been verified offline against FakeTorino. The command-line `python main.py hardware` produced the bundled `ibm_quebec` result. QML is not implemented. Tool quiz and lab progress resets on refresh; Qubits vs Noise progress is kept in the browser. Do not present synthetic teaching data as hardware measurements.
 
